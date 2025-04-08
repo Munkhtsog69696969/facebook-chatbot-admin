@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Badge from "../ui/badge/Badge";
-import { ArrowDownIcon, ArrowUpIcon, GroupIcon} from "@/icons";
+// import Badge from "../ui/badge/Badge";
+import { ArrowUpIcon, GroupIcon} from "@/icons";
 import { MapPinIcon } from "@/icons/custom-icons";
 import { PhoneIcon } from "@/icons/custom-icons";
 import { GlobeIcon } from "@/icons/custom-icons";

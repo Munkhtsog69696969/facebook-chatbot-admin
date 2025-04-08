@@ -94,13 +94,20 @@ export default function AiResponse() {
     fetchInitialData()
   }, [])
 
-  useEffect(()=>{
-    if(responseType=="message" && !currentResponseMessage){
-        fetchCurrentMessageResponse()
-    }else if(responseType=="comment" && !currentResponseComment){
-        fetchCurrentCommentResponse()
+//   useEffect(()=>{
+//     if(responseType=="message" && !currentResponseMessage){
+//         fetchCurrentMessageResponse()
+//     }else if(responseType=="comment" && !currentResponseComment){
+//         fetchCurrentCommentResponse()
+//     }
+//   },[responseType])
+  useEffect(() => {
+    if (responseType === "message" && !currentResponseMessage) {
+      fetchCurrentMessageResponse()
+    } else if (responseType === "comment" && !currentResponseComment) {
+      fetchCurrentCommentResponse()
     }
-  },[responseType])
+  }, [responseType, currentResponseMessage, currentResponseComment]) // Added missing dependencies
 
   const handleUpdateResponse=async()=>{
     if(responseType=="comment" && newResponseComment.trim()==""){
@@ -168,8 +175,8 @@ export default function AiResponse() {
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
               AI Response Management
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Update your AI's response patterns and behaviors
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+                Update your AI&apos;s response patterns and behaviors {/* Fixed unescaped entity */}
             </p>
           </div>
           <div className="flex items-center gap-3">

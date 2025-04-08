@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import { format } from "date-fns"
 import { useSocket } from "@/context/SocketContext"
 
@@ -90,7 +90,7 @@ export default function PrivateMessage() {
         }
     }
 
-    const fetchInitialUserMessages = async() => {
+    const fetchInitialUserMessages = useCallback(async() => {
         try {
             setLoading(true)
             const url = new URL(`https://facebook-chatbot-rj6n.onrender.com/messenger/messages/${userId}`)
@@ -103,20 +103,17 @@ export default function PrivateMessage() {
             })
     
             const data: PrivateMessages = await res.json()
-            // console.log("Initial fetch data", data)
-            // Reverse the messages array to show oldest first
             setMessages(data.data[0].messages.data.reverse())
             setNextPagingUrl(data.data[0].messages.paging)
-            setTimeout(scrollToBottom, 100) 
-            // scrollToBottom()
+            setTimeout(scrollToBottom, 100)
         } catch (error) {
             console.error('Error fetching messages:', error)
         } finally {
             setLoading(false)
         }       
-    }
+    }, [userId, scrollToBottom])
     
-    async function getNextChats() {
+    const getNextChats = useCallback(async () => {
         if (!nextPagingUrl?.next || loading) return
         
         try {
@@ -132,14 +129,10 @@ export default function PrivateMessage() {
             const data: PaginationMessages = await res.json()
             
             if (data.data) {
-                // First reverse the new messages to maintain chronological order
                 const newMessages = [...data.data].reverse()
-                
-                // Then merge with existing messages without reversing them again
                 setMessages(prev => prev ? [...newMessages, ...prev] : newMessages)
                 setNextPagingUrl(data.paging)
                 
-                // Maintain scroll position after loading more messages
                 setTimeout(() => {
                     if (containerRef.current) {
                         const newHeight = containerRef.current.scrollHeight
@@ -152,7 +145,7 @@ export default function PrivateMessage() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [loading, nextPagingUrl])
 
     useEffect(() => {
         const container = containerRef.current
@@ -166,13 +159,13 @@ export default function PrivateMessage() {
 
         container.addEventListener('scroll', handleScroll)
         return () => container.removeEventListener('scroll', handleScroll)
-    }, [loading, nextPagingUrl])
+    }, [loading, nextPagingUrl, getNextChats])
 
     useEffect(() => {
         if (userId) {
             fetchInitialUserMessages()
         }
-    }, [userId])
+    }, [userId, fetchInitialUserMessages])
 
     useEffect(()=>{
         if(socket){
@@ -192,10 +185,10 @@ export default function PrivateMessage() {
 
     },[socket])
 
-    const sendMessage=async()=>{
+    const sendMessage = async () => {
         try {
             const url = new URL(`https://facebook-chatbot-rj6n.onrender.com/messenger/messages/${userId}`)
-            const res = await fetch(url.toString(), {
+            await fetch(url.toString(), {  // Changed from const res = await fetch
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -203,9 +196,6 @@ export default function PrivateMessage() {
                 },
                 body: JSON.stringify({message: newMessage})
             })
-    
-            const data = await res.json()
-            // console.log("Send message data", data)
             setNewMessage("") 
         } catch (error) {
             console.error('Error sending message:', error)
